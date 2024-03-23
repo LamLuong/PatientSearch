@@ -6,13 +6,15 @@ from pydantic import (
   HttpUrl,
   PostgresDsn,
   ValidationInfo,
+  computed_field,
   field_validator,
 )
+from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-  API_V1_STR: str = ""
+  API_V1_STR: str = "/api/v1"
   SECRET_KEY: str = secrets.token_urlsafe(32)
   # 60 minutes * 24 hours * 8 days = 8 days
   ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
       return v
     raise ValueError(v)
 
-  PROJECT_NAME: str = "Test"
+  PROJECT_NAME: str = "PatientSearch"
   SENTRY_DSN: HttpUrl | None = None
 
   @field_validator("SENTRY_DSN", mode="before")
@@ -41,23 +43,22 @@ class Settings(BaseSettings):
       return None
     return v
 
-#   POSTGRES_SERVER: str
-#   POSTGRES_USER: str
-#   POSTGRES_PASSWORD: str
-#   POSTGRES_DB: str
-#   SQLALCHEMY_DATABASE_URI: PostgresDsn | None = None
-
-#   @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
-#   def assemble_db_connection(cls, v: str | None, info: ValidationInfo) -> Any:
-#     if isinstance(v, str):
-#       return v
-#     return PostgresDsn.build(
-#       scheme="postgresql+psycopg",
-#       username=info.data.get("POSTGRES_USER"),
-#       password=info.data.get("POSTGRES_PASSWORD"),
-#       host=info.data.get("POSTGRES_SERVER"),
-#       path=f"{info.data.get('POSTGRES_DB') or ''}",
-#     )
+  POSTGRES_SERVER: str = "localhost"
+  POSTGRES_USER: str = "admin"
+  POSTGRES_PASSWORD: str = "123qwe"
+  POSTGRES_DB: str = "patient_mr"
+  POSTGRES_PORT: int = 5432
+  @computed_field  # type: ignore[misc]
+  @property
+  def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+    return MultiHostUrl.build(
+      scheme="postgresql+psycopg",
+      username=self.POSTGRES_USER,
+      password=self.POSTGRES_PASSWORD,
+      host=self.POSTGRES_SERVER,
+      port=self.POSTGRES_PORT,
+      path=self.POSTGRES_DB,
+    )
 
   SMTP_TLS: bool = True
   SMTP_PORT: int | None = None

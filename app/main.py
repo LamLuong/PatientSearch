@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api import api_router
-from app.core.config import settings
+from app.config import settings
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -14,7 +14,7 @@ def custom_generate_unique_id(route: APIRoute):
 
 app = FastAPI(
   title=settings.PROJECT_NAME,
-  openapi_url=f"{settings.API_V1_STR}/openapi.json",
+  openapi_url=f"/openapi.json",
   generate_unique_id_function=custom_generate_unique_id,
 )
 
@@ -30,5 +30,5 @@ if settings.BACKEND_CORS_ORIGINS:
     allow_headers=["*"],
   )
 
-app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(api_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
