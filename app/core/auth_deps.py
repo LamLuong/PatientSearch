@@ -13,7 +13,9 @@ from jose import JWTError, jwt
 from pydantic import ValidationError, BaseModel
 from typing import Any
 
+from app.core.db import SessionDep
 from app.config import settings
+from app.core.utils import OAuth2PasswordBearerWithCookie
 
 class Token(SQLModel):
   access_token: str
@@ -36,11 +38,10 @@ class User(SQLModel, table=True):
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"
 
-oauth2_scheme = OAuth2PasswordBearer(
-  tokenUrl=f"{settings.API_V1_STR}/login"
-)
-
-TokenDep = Annotated[str, Depends(oauth2_scheme)]
+# oauth2_scheme = OAuth2PasswordBearer(
+#   tokenUrl=f"{settings.API_V1_STR}/login"
+# )
+oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl=f"{settings.API_V1_STR}/login", auto_error=False)
 
 def verify_password(plain_password, hashed_password):
   return pwd_context.verify(plain_password, hashed_password)
@@ -55,7 +56,7 @@ def get_user(db, username: str):
     user_dict = db[username]
     return User(**user_dict)
 
-def authenticate_user(*, session: Session, username: str, password: str):
+def authenticate_user(*, session: SessionDep, username: str, password: str):
   statement = select(User).where(User.username == username)
   user = session.exec(statement).first()
 
@@ -76,12 +77,16 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
   encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
   return encoded_jwt
 
-async def get_current_user(*, session: Session, token: Annotated[str, Depends(oauth2_scheme)]):
+TokenDep = Annotated[str, Depends(oauth2_scheme)]
+async def get_current_user(*, session: SessionDep, token: TokenDep):
   credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Could not validate credentials",
     headers={"WWW-Authenticate": "Bearer"},
   )
+  if not token:
+    return None
+  
   try:
     payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
     username: str = payload.get("sub")
