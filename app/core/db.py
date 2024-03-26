@@ -17,7 +17,7 @@ def init_db() -> None:
   SQLModel.metadata.create_all(engine)
 
 if __name__=="__main__": 
-  from app.core.auth_deps import User, UserType, get_password_hash
+  from app.models import User, PatientInfo, UserType
   init_db()
   admin_user = User(username="dongtd", hashed_password="$2b$12$N/uHi0nEBfCSw0tDSsbpjuQBaFbW7vWjFb0fOadhM.TXFSOMaZ3FC", user_type=UserType.normal)
   session = Session(engine)

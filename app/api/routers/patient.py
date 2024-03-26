@@ -1,26 +1,45 @@
+import aiofiles
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile
 from sqlmodel import Field, Relationship, SQLModel
 from fastapi.responses import FileResponse
 
+from app.models import PatientInfo, PatientInfoBase
+from app.core.db import engine, SessionDep
+from app.core.auth_deps import CurrentUser
 router = APIRouter()
 
-class Patient(SQLModel):
-  id: str
-  name: str
-  mother_name: str
-  phone : str
+@router.get("/get-patient/", response_model=PatientInfo)
+async def read_items(*, session: SessionDep, document_id: str):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    item = session.get(PatientInfo, document_id)
 
+    return item
 
-@router.get("/patient-info", response_model=Patient)
-def read_patient(patient_id: str) -> Any:
-  print("patient_id", patient_id)
-  if not patient_id:
-    raise HTTPException(status_code=404, detail="Patient id is empty!")
+@router.post("/create-patient")
+async def create_patient( *, session: SessionDep, current_user: CurrentUser,
+                         document_id: str = Form(...),
+                         name: str = Form(...),
+                         mother_name: str = Form(...),
+                         phone: str = Form(...),
+                         file: UploadFile) -> Any:
   
-  return Patient(id="dsa", name="Tran Minh Anh", mother_name="Nguyen Minh Trang", phone="0345689963")
+  out_file_path = "./files/" + file.filename
+  async with aiofiles.open(out_file_path, 'wb') as out_file:
+        content = await file.read()  # async read
+        await out_file.write(content)  # async write
+  try:
+    item = PatientInfoBase(document_id=document_id,
+                     name=name,
+                     mother_name=mother_name,
+                     phone=phone)
+  except:
+    raise HTTPException(status_code=422, detail="Invalid input")
+  
+  item_db = PatientInfo.model_validate(item, update={"document_path": file.filename})
+  session.add(item_db)
+  session.commit()
+  session.refresh(item_db)
 
-@router.get("/patient-result")
-async def main():
-    return FileResponse("/home/lamlt/Downloads/2110.06864.pdf")
+  return {"status":"update patient 's document sucessfully."}

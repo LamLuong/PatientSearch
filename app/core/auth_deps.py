@@ -1,12 +1,9 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-import enum
-from sqlalchemy import Enum, Column
-
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
-from sqlmodel import SQLModel, Field, Session, select
+from sqlmodel import Session, select
 
 from typing import Annotated
 from jose import JWTError, jwt
@@ -16,24 +13,7 @@ from typing import Any
 from app.core.db import SessionDep
 from app.config import settings
 from app.core.utils import OAuth2PasswordBearerWithCookie
-
-class Token(SQLModel):
-  access_token: str
-  token_type: str = "bearer"
-
-
-class TokenData(SQLModel):
-  username: str | None = None
-
-class UserType(enum.Enum):
-  normal = 0
-  admin  = 1
-
-class User(SQLModel, table=True):
-  id: int | None = Field(default=None, primary_key=True)
-  username: str
-  hashed_password: str
-  user_type: UserType
+from app.models import Token, UserType, User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"
@@ -92,7 +72,6 @@ async def get_current_user(*, session: SessionDep, token: TokenDep):
     username: str = payload.get("sub")
     if username is None:
       raise credentials_exception
-    token_data = TokenData(username=username)
   except JWTError:
     raise credentials_exception
   
