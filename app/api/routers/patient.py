@@ -1,21 +1,32 @@
 import aiofiles
-from typing import Any
+from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile
 from sqlmodel import Field, Relationship, SQLModel
 from fastapi.responses import FileResponse
 
+
 from app.models import PatientInfo, PatientInfoBase
 from app.core.db import engine, SessionDep
 from app.core.auth_deps import CurrentUser
+from sqlmodel import select
+
 router = APIRouter()
 
 @router.get("/get-patient/", response_model=PatientInfo)
-async def read_items(*, session: SessionDep, document_id: str):
+async def read_item(*, session: SessionDep, document_id: str):
     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
     item = session.get(PatientInfo, document_id)
 
     return item
+
+@router.get("/get-patients/", response_model=List[PatientInfo])
+async def read_items(*, session: SessionDep, current_user: CurrentUser, limit: int = 5, offset: int = 0):
+    statement = select(PatientInfo).offset(offset).limit(limit)
+    items = session.exec(statement)
+
+    return items
+
 
 @router.post("/create-patient")
 async def create_patient( *, session: SessionDep, current_user: CurrentUser,
