@@ -4,18 +4,18 @@ from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, Response, status
 from fastapi.responses import StreamingResponse
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, select, func
 from fastapi.responses import FileResponse
+from datetime import datetime,timezone
 
 
-from app.models import PatientInfo, PatientInfoBase
+from app.models import PatientInfo, PatientInfoBase, PatientsList
 from app.core.db import engine, SessionDep
 from app.core.auth_deps import CurrentUser
-from sqlmodel import select
 
 router = APIRouter()
 
-@router.get("/get-patient/", response_model=PatientInfo)
+@router.get("/get-patient", response_model=PatientInfo)
 async def read_item(*, session: SessionDep, document_id: str):
   if not document_id:
     raise HTTPException(
@@ -33,7 +33,7 @@ async def read_item(*, session: SessionDep, document_id: str):
     )
   return item
 
-@router.get("/patient-doc/", response_model=PatientInfo)
+@router.get("/patient-doc", response_model=PatientInfo)
 async def patient_doc(*, document_name: str, response: Response):
   file_name = "./files/" + document_name
   print(file_name)
@@ -48,18 +48,40 @@ async def patient_doc(*, document_name: str, response: Response):
   response = StreamingResponse(f, media_type="application/pdf", headers=headers)
   return response
 
-@router.get("/get-patients/", response_model=List[PatientInfo])
-async def read_items(*, session: SessionDep, current_user: CurrentUser, limit: int = 5, offset: int = 0):
-  if not current_user:
-    raise HTTPException(
-          status_code=status.HTTP_401_UNAUTHORIZED,
-          detail="Not authenticated",
-          headers={"WWW-Authenticate": "Bearer"},
-        )
-  statement = select(PatientInfo).offset(offset).limit(limit)
-  items = session.exec(statement)
+@router.get("/get-patients", response_model=PatientsList)
+async def read_items(*, session: SessionDep, name: str = None, seen : bool = None, limit: int = 5, offset: int = 0):
+  # if not current_user:
+  #   raise HTTPException(
+  #         status_code=status.HTTP_401_UNAUTHORIZED,
+  #         detail="Not authenticated",
+  #         headers={"WWW-Authenticate": "Bearer"},
+  #       )
 
-  return items
+  count_statement = select(func.count(PatientInfo.document_id))
+
+  if name:
+    count_statement = count_statement.where(PatientInfo.name.contains(name))
+  if seen is not None:
+    count_statement = count_statement.where(PatientInfo.is_downloaded == seen)
+
+  total_record = session.exec(count_statement).one()
+  
+  if total_record == 0:
+    return PatientsList(patients=[], total=0)
+  
+  statement = select(PatientInfo)
+
+  if name:
+    statement = statement.where(PatientInfo.name.contains(name))
+
+  if seen is not None:
+    statement = statement.where(PatientInfo.is_downloaded == seen)
+
+
+  statement = statement.order_by(PatientInfo.created_at).offset(offset).limit(limit)
+  items = session.exec(statement)
+  patients_list = PatientsList(patients=items, total=total_record)
+  return patients_list
 
 
 @router.post("/create-patient")
@@ -85,7 +107,8 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
   except:
     raise HTTPException(status_code=422, detail="Invalid input")
   
-  item_db = PatientInfo.model_validate(item, update={"document_path": file.filename})
+  item_db = PatientInfo.model_validate(item, update={"document_path": file.filename, "created_at":datetime.now(timezone.utc)})
+  print(item_db.created_at)
   session.add(item_db)
   session.commit()
   session.refresh(item_db)

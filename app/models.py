@@ -1,6 +1,8 @@
 import enum, re
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, DateTime
 from pydantic import validator
+from datetime import datetime
+from typing import  List
 
 class Token(SQLModel):
   access_token: str
@@ -22,15 +24,20 @@ class PatientInfoBase(SQLModel):
   mother_name: str = Field(min_length=1, max_length=32)
   phone: str
 
-  @validator("phone")
-  def phone_validation(cls, v):
-    regex = r"^(\+)[1-9][0-9\-\(\)\.]{9,15}$"
-    if v and not re.search(regex, v, re.I):
-      raise ValueError("Phone Number Invalid.")
-    return v
+  # @validator("phone")
+  # def phone_validation(cls, v):
+  #   regex = r"^[1-9][0-9\-\(\)\.]{9,15}$"
+  #   if v and not re.search(regex, v, re.I):
+  #     raise ValueError("Phone Number Invalid.")
+  #   return v
 
 class PatientInfo(PatientInfoBase, table=True):
   __tablename__ = "patient_info"
 
   document_path: str
   is_downloaded: bool = Field(default=False)
+  created_at:  datetime = Field(DateTime(timezone=True), nullable=False)
+
+class PatientsList(SQLModel):
+  patients: List[PatientInfo]
+  total: int = 0
