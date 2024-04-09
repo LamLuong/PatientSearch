@@ -1097,3 +1097,11 @@ section {
   font-size: 30px;
   text-align: center;
 }
+
+.delete-patient {
+  cursor: pointer
+}
+
+.delete-patient:hover {
+  color: red;
+}

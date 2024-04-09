@@ -101,7 +101,7 @@ function getPatientsByFilter(offset=1) {
   var filterNotViewed = null, filterName = null;
   if (getJustNotViewed) filterNotViewed = false;
   if (inputName) filterName = inputName;
-  
+
   console.log(offset)
   getPatients(filterName, filterNotViewed, offset);
 }
@@ -128,6 +128,25 @@ function goToPaging(obj, direct=true) {
   }
 
   getPatientsByFilter(current_paging)
+}
+
+function deletePatient(obj) {
+  doc_id = $(obj).parent().parent().children(':first-child').text()
+  url = window.location.origin + '/delete-patient/' + doc_id;
+  $.ajax({
+    url: url,
+    type: 'DELETE',
+    data: {},
+    success: function (data) {
+      getPatientsByFilter(current_paging)
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+      alert("Error: " + errorThrown); 
+    },
+    cache: false,
+    contentType: false,
+    processData: false
+  });
 }
 
 function getPatients(name = null, seen = null, offset = 1) {
@@ -159,15 +178,15 @@ function getPatients(name = null, seen = null, offset = 1) {
           var theDate = (new Date(utc_time)).toLocaleString('en-GB')
           // var theDate = new Date(Date.parse(value.created_at));
 
-          $('#list-patients').append("<tr>\
-                <td>"+value.document_id+"</td>\
-                <td>"+value.name+"</td>\
-                <td>"+value.mother_name+"</td>\
-                <td>"+value.phone+"</td>\
-                <td>"+theDate+"</td>\
-                <td>"+status+"</td>\
-                <td>"+"Xóa"+"</td>\
-                </tr>");
+          $('#list-patients').append('<tr>\
+                <td>'+value.document_id+'</td>\
+                <td>'+value.name+'</td>\
+                <td>'+value.mother_name+'</td>\
+                <td>'+value.phone+'</td>\
+                <td>'+theDate+'</td>\
+                <td>'+status+'</td>\
+                <td> <a class="delete-patient" onClick="deletePatient(this)">Xóa</a></td>\
+                </tr>');
         })
 
 
@@ -178,6 +197,10 @@ function getPatients(name = null, seen = null, offset = 1) {
                                       </li>')
         // $('#data-paging-idx').append('<li class="page-item"><a class="page-link active" onClick=goToPaging(this) style="cursor: pointer">'+i+'</a></li>');
         total_page = Math.ceil(data.total / 2)
+        if (current_paging > total_page) {
+          current_paging = total_page
+        }
+
         for (i = 1; i <= total_page; i++) {
           if (i < 4 || i == total_page)
             if (i == current_paging)
