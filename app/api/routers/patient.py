@@ -1,8 +1,8 @@
 import aiofiles
 import os
-from typing import Any, List
+from typing import Annotated, Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, Response, status, Query
 from fastapi.responses import StreamingResponse
 from sqlmodel import Field, Relationship, SQLModel, select, func
 from fastapi.responses import FileResponse
@@ -49,14 +49,15 @@ async def patient_doc(*, document_name: str, response: Response):
   return response
 
 @router.get("/get-patients", response_model=PatientsList)
-async def read_items(*, session: SessionDep, name: str = None, seen : bool = None, limit: int = 5, offset: int = 0):
-  # if not current_user:
-  #   raise HTTPException(
-  #         status_code=status.HTTP_401_UNAUTHORIZED,
-  #         detail="Not authenticated",
-  #         headers={"WWW-Authenticate": "Bearer"},
-  #       )
-
+async def read_items(*, session: SessionDep, current_user: CurrentUser,
+                     name:  Annotated[str | None, Query(max_length=100)] = None, seen : bool = None,
+                     limit: Annotated[int, Query(ge=1, le=100)] = 2, offset: Annotated[int , Query(ge=1)] = 1):
+  if not current_user:
+    raise HTTPException(
+          status_code=status.HTTP_401_UNAUTHORIZED,
+          detail="Not authenticated",
+          headers={"WWW-Authenticate": "Bearer"},
+        )
   count_statement = select(func.count(PatientInfo.document_id))
 
   if name:
@@ -78,7 +79,7 @@ async def read_items(*, session: SessionDep, name: str = None, seen : bool = Non
     statement = statement.where(PatientInfo.is_downloaded == seen)
 
 
-  statement = statement.order_by(PatientInfo.created_at).offset(offset).limit(limit)
+  statement = statement.order_by(PatientInfo.created_at).offset((offset - 1)* limit).limit(limit)
   items = session.exec(statement)
   patients_list = PatientsList(patients=items, total=total_record)
   return patients_list
@@ -92,6 +93,13 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
                          phone: str = Form(...),
                          file: UploadFile) -> Any:
   
+  if not current_user:
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+        headers={"WWW-Authenticate": "Bearer"},
+      )
+
   if file.content_type != "application/pdf":
     raise HTTPException(400, detail="Invalid pdf document type")
   
