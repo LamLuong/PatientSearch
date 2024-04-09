@@ -2,7 +2,7 @@ import aiofiles
 import os
 from typing import Annotated, Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, Response, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, Response, status, Query, Path
 from fastapi.responses import StreamingResponse
 from sqlmodel import Field, Relationship, SQLModel, select, func
 from fastapi.responses import FileResponse
@@ -116,9 +116,27 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
     raise HTTPException(status_code=422, detail="Invalid input")
   
   item_db = PatientInfo.model_validate(item, update={"document_path": file.filename, "created_at":datetime.now(timezone.utc)})
-  print(item_db.created_at)
+  # print(item_db.created_at)
   session.add(item_db)
   session.commit()
   session.refresh(item_db)
 
   return {"status":"update patient 's document sucessfully."}
+
+@router.delete("/delete-patient/{document_id}")
+async def create_patient( *, session: SessionDep, current_user: CurrentUser,
+                         document_id:  Annotated[str, Path(min_length=1, max_length=100)]):
+  
+  if not current_user:
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+        headers={"WWW-Authenticate": "Bearer"},
+      )
+  patient = session.get(PatientInfo, document_id)
+  if not patient:
+    raise HTTPException(status_code=404, detail="Patient not found")
+  session.delete(patient)
+  session.commit()
+  return {"status":"delete patient 's document sucessfully."}
+
