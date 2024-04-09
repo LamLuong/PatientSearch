@@ -1,3 +1,6 @@
+var current_paging = 1;
+var total_page;
+
 $("#authUser").click(function() {
   url = window.location.origin + '/api/v1/login'
 
@@ -91,7 +94,43 @@ $("form#create-new-patient").submit(function(e) {
   });
 });
 
-function getPatients(name = null, seen = null, offset = 0) {
+function getPatientsByFilter(offset=1) {
+  var getJustNotViewed = $("#admin-get-viewed").is(":checked");
+  var inputName = document.getElementById("admin-filter-name").value
+  
+  var filterNotViewed = null, filterName = null;
+  if (getJustNotViewed) filterNotViewed = false;
+  if (inputName) filterName = inputName;
+  
+  console.log(offset)
+  getPatients(filterName, filterNotViewed, offset);
+}
+
+function goToPaging(obj, direct=true) {
+  if (obj !== null) {
+    current_paging = $(obj).text()
+  } else {
+    if (!direct)
+      current_paging = current_paging - 1
+
+    if (direct)
+      current_paging = current_paging + 1
+  }
+
+  if (current_paging < 1) {
+    current_paging = 1;
+    return
+  }
+
+  if (current_paging > total_page) {
+    current_paging = total_page;
+    return
+  }
+
+  getPatientsByFilter(current_paging)
+}
+
+function getPatients(name = null, seen = null, offset = 1) {
   url = window.location.origin + '/get-patients?'
   if (name !== null) {  
     url = url + 'name=' + name
@@ -99,14 +138,16 @@ function getPatients(name = null, seen = null, offset = 0) {
   if (seen !== null) {  
     url = url + '&seen=' + seen
   }
-  
+
+  url = url + '&offset=' + offset
+  console.log(url)
   $.ajax({
       url: url,
       type: 'GET',
       data: {},
       success: function (data) {
         $('#list-patients').empty();
-        console.log(data.total)
+        $('#data-paging-idx').empty();
 
         $.each(data.patients, function (key, value) {
           var status = "Chưa xem"
@@ -128,6 +169,34 @@ function getPatients(name = null, seen = null, offset = 0) {
                 <td>"+"Xóa"+"</td>\
                 </tr>");
         })
+
+
+        $('#data-paging-idx').append('<li class="page-item">\
+                                        <a class="page-link" onClick="goToPaging(null, false)" style="cursor: default" aria-label="Previous">\
+                                          <span aria-hidden="true">&laquo;</span>\
+                                        </a>\
+                                      </li>')
+        // $('#data-paging-idx').append('<li class="page-item"><a class="page-link active" onClick=goToPaging(this) style="cursor: pointer">'+i+'</a></li>');
+        total_page = Math.ceil(data.total / 2)
+        for (i = 1; i <= total_page; i++) {
+          if (i < 4 || i == total_page)
+            if (i == current_paging)
+              $('#data-paging-idx').append('<li class="page-item"><a class="page-link active" onClick=goToPaging(this) style="cursor: pointer">'+i+'</a></li>');
+            else
+              $('#data-paging-idx').append('<li class="page-item"><a class="page-link" onClick=goToPaging(this) style="cursor: pointer">'+i+'</a></li>');
+          else if (i == 4) {
+            if (current_paging >= 4 && current_paging < total_page)
+              $('#data-paging-idx').append('<li class="page-item"><a class="page-link active" style="cursor: default">' + current_paging + '</a></li>');
+            $('#data-paging-idx').append('<li class="page-item"><a class="page-link" style="cursor: default">...</a></li>');
+          }
+        }
+
+        $('#data-paging-idx').append('<li class="page-item">\
+                                        <a class="page-link" onClick="goToPaging(null, true)" style="cursor: default" aria-label="Next">\
+                                          <span aria-hidden="true">&raquo;</span>\
+                                        </a>\
+                                      </li>')
+        
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) { 
         alert("Error: " + errorThrown); 
@@ -136,17 +205,6 @@ function getPatients(name = null, seen = null, offset = 0) {
       contentType: false,
       processData: false
   });
-}
-
-function getPatientsByFilter() {
-  var getJustNotViewed = $("#admin-get-viewed").is(":checked");
-  var inputName = document.getElementById("admin-filter-name").value
-  
-  var filterNotViewed = null, filterName = null;
-  if (getJustNotViewed) filterNotViewed = false;
-  if (inputName) filterName = inputName;
-
-  getPatients(filterName, filterNotViewed);
 }
 
 // A $( document ).ready() block.
