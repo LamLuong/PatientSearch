@@ -23,6 +23,12 @@ ALGORITHM = "HS256"
 # )
 oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl=f"{settings.API_V1_STR}/login", auto_error=False)
 
+credentials_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Could not validate credentials",
+    headers={"WWW-Authenticate": "Bearer"},
+  )
+
 def verify_password(plain_password, hashed_password):
   return pwd_context.verify(plain_password, hashed_password)
 
@@ -59,11 +65,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
 async def get_current_user(*, session: SessionDep, token: TokenDep):
-  credentials_exception = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
-    headers={"WWW-Authenticate": "Bearer"},
-  )
   if not token:
     return None
   
@@ -71,15 +72,13 @@ async def get_current_user(*, session: SessionDep, token: TokenDep):
     payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
     username: str = payload.get("sub")
     if username is None:
-      raise credentials_exception
+      return None
   except JWTError:
-    raise credentials_exception
+    return None
   
   statement = select(User).where(User.username == username)
   user = session.exec(statement).first()
 
-  if user is None:
-    raise credentials_exception
   return user
 
 CurrentUser = Annotated[User, Depends(get_current_user)]

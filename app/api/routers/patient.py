@@ -11,7 +11,7 @@ from datetime import datetime,timezone
 
 from app.models import PatientInfo, PatientInfoBase, PatientsList
 from app.core.db import engine, SessionDep
-from app.core.auth_deps import CurrentUser
+from app.core.auth_deps import CurrentUser, credentials_exception
 
 router = APIRouter()
 
@@ -53,11 +53,8 @@ async def read_items(*, session: SessionDep, current_user: CurrentUser,
                      name:  Annotated[str | None, Query(max_length=100)] = None, seen : bool = None,
                      limit: Annotated[int, Query(ge=1, le=100)] = 2, offset: Annotated[int , Query(ge=1)] = 1):
   if not current_user:
-    raise HTTPException(
-          status_code=status.HTTP_401_UNAUTHORIZED,
-          detail="Not authenticated",
-          headers={"WWW-Authenticate": "Bearer"},
-        )
+    raise credentials_exception
+  
   count_statement = select(func.count(PatientInfo.document_id))
 
   if name:
@@ -94,11 +91,7 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
                          file: UploadFile) -> Any:
   
   if not current_user:
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated",
-        headers={"WWW-Authenticate": "Bearer"},
-      )
+    raise credentials_exception
 
   if file.content_type != "application/pdf":
     raise HTTPException(400, detail="Invalid pdf document type")
@@ -128,11 +121,8 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
                          document_id:  Annotated[str, Path(min_length=1, max_length=100)]):
   
   if not current_user:
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated",
-        headers={"WWW-Authenticate": "Bearer"},
-      )
+    raise credentials_exception
+  
   patient = session.get(PatientInfo, document_id)
   if not patient:
     raise HTTPException(status_code=404, detail="Patient not found")
