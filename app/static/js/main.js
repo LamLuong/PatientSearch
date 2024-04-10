@@ -102,32 +102,47 @@ function getPatientsByFilter(offset=1) {
   if (getJustNotViewed) filterNotViewed = false;
   if (inputName) filterName = inputName;
 
-  console.log(offset)
   getPatients(filterName, filterNotViewed, offset);
 }
 
+function UpdateViewByFilter() {
+  current_paging = 1
+  getPatientsByFilter()
+}
+
+
+
 function goToPaging(obj, direct=true) {
+  
   if (obj !== null) {
     current_paging = $(obj).text()
   } else {
     if (!direct)
-      current_paging = current_paging - 1
+      current_paging = parseInt(current_paging) - 1
 
     if (direct)
-      current_paging = current_paging + 1
+      current_paging = parseInt(current_paging) + 1
   }
-
+  
   if (current_paging < 1) {
     current_paging = 1;
     return
   }
-
+  
   if (current_paging > total_page) {
     current_paging = total_page;
     return
   }
-
+  
   getPatientsByFilter(current_paging)
+}
+
+function dropDownGotoPage() {
+  input_page = document.getElementById('goto-page-dropdown-menu').children[0].children[0];
+  if (input_page.reportValidity()) {
+    current_paging = input_page.value
+    getPatientsByFilter(current_paging) 
+  }
 }
 
 function deletePatient(obj) {
@@ -147,6 +162,16 @@ function deletePatient(obj) {
     contentType: false,
     processData: false
   });
+}
+
+function showGotoPageDropdown() {
+  var x = document.getElementById("goto-page-dropdown-menu")
+
+  if($('#goto-page-dropdown-menu').css('display') == 'none') {
+    x.style.display = "block"
+  } else {
+    x.style.display = "none"
+  }
 }
 
 function getPatients(name = null, seen = null, offset = 1) {
@@ -210,7 +235,15 @@ function getPatients(name = null, seen = null, offset = 1) {
           else if (i == 4) {
             if (current_paging >= 4 && current_paging < total_page)
               $('#data-paging-idx').append('<li class="page-item"><a class="page-link active" style="cursor: default">' + current_paging + '</a></li>');
-            $('#data-paging-idx').append('<li class="page-item"><a class="page-link" style="cursor: default">...</a></li>');
+            $('#data-paging-idx').append('<li class="page-item">\
+                                            <a class="page-link" style="cursor: default; margin-bottom: 12px" onClick=showGotoPageDropdown()>...</a>\
+                                            <div class="goto-page-dropdown-content arrow-top" id="goto-page-dropdown-menu">\
+                                              <div class="input-group popup-wrapper">\
+                                                <input type="number" class="form-control" min="1" max="'+total_page+'" placeholder="Tới trang">\
+                                                <button type="button" class="btn btn-success" onClick=dropDownGotoPage()> Đi </button>\
+                                              </div>\
+                                            </div>\
+                                          </li>');
           }
         }
 
