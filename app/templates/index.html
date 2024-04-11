@@ -94,7 +94,7 @@
               <span class="navbar-toggler-icon"></span>
             </button>
               <ul>
-                <li><a class="nav-link scrollto active" href="#hero" id="menu-search-page">Tìm kiếm</a></li>
+                <li><a class="nav-link scrollto active" href="#patient-search" id="menu-search-page">Tìm kiếm</a></li>
                 {% if not username %}
                 <li><a class="nav-link scrollto" href="#about">Về Chúng Tôi</a></li>
                 <li><a class="nav-link scrollto" href="#services">Liên Hệ</a></li>
@@ -113,7 +113,7 @@
       
       <main id="main"> 
         {% if username %}
-        <section id="add-patient-doc" class="add-patient-doc" style="padding-top: 200px;padding-bottom:0px;">
+        <section id="add-patient-doc" class="add-patient-doc" style="padding-top: 200px;padding-bottom:0px;display:none">
           <div class="container">
             <!-- <button type="submit" class="btn btn-success"><span class="bi-plus"></span> Thêm hồ sơ</button> -->
             <form id="create-new-patient" method="post" enctype="multipart/form-data">
@@ -161,7 +161,7 @@
           </div>
         </section>
         
-        <section id="update-patient-doc" class="update-patient-doc">
+        <section id="update-patient-doc" class="update-patient-doc" style="display:none">
           <div class="container">
             <div class="row ">
               <div class="col-lg-4">
@@ -221,15 +221,10 @@
             </table>
           </div>
         </section>
-        {% else %}
+        {% endif %}
         <section></section>
-        {% endif %}
         
-        {% if not username %}
         <section id="search" class="search">
-        {% else %}
-        <section id="search" class="search" style="display: none">
-        {% endif %}
           <div class="container">
             <h1 >Tìm kiếm kết quả sàng lọc sơ sinh</h1>
             <input type="search" id="search-with-id" class="form-control" placeholder="Ví dụ: 2200012345 hoặc AA123456"/>
@@ -335,5 +330,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="{{ url_for('static', path='/js/main.js') }}"></script>
+  <script src="{{ url_for('static', path='/js/normal_user.js') }}"></script>
+  {% if username %}
+  <script src="{{ url_for('static', path='/js/admin_user.js') }}"></script>
+  {% endif %}
 </html>
