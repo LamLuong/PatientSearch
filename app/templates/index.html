@@ -94,13 +94,14 @@
               <span class="navbar-toggler-icon"></span>
             </button>
               <ul>
-                <li><a class="nav-link scrollto active" href="#patient-search" id="menu-search-page">Tìm kiếm</a></li>
                 {% if not username %}
+                <li><a class="nav-link scrollto active" href="#patient-search" id="menu-search-page">Tìm kiếm</a></li>
                 <li><a class="nav-link scrollto" href="#about">Về Chúng Tôi</a></li>
                 <li><a class="nav-link scrollto" href="#services">Liên Hệ</a></li>
                 <li><a class="nav-link scrollto" href="#login" data-bs-toggle="modal" data-bs-target="#authUserForm">Đăng Nhập</a></li>
                 {% else %}
-                <li><a class="nav-link scrollto" href="#patient-data" id="menu-patient-data-page"> Dữ liệu bệnh nhân</a></li>
+                <li><a class="nav-link scrollto" href="#patient-search" id="menu-search-page">Tìm kiếm</a></li>
+                <li><a class="nav-link scrollto active" href="#patient-data" id="menu-patient-data-page"> Dữ liệu bệnh nhân</a></li>
                 <li><a class="nav-link scrollto"> {{ username }}</a></li>
                 <li><a id="logout" href="#logout" class="nav-link scrollto" > Logout</a></li>
                 {% endif %}
@@ -113,7 +114,7 @@
       
       <main id="main"> 
         {% if username %}
-        <section id="add-patient-doc" class="add-patient-doc" style="padding-top: 200px;padding-bottom:0px;display:none">
+        <section id="add-patient-doc" class="add-patient-doc" style="padding-top: 200px;padding-bottom:0px">
           <div class="container">
             <!-- <button type="submit" class="btn btn-success"><span class="bi-plus"></span> Thêm hồ sơ</button> -->
             <form id="create-new-patient" method="post" enctype="multipart/form-data">
@@ -161,7 +162,7 @@
           </div>
         </section>
         
-        <section id="update-patient-doc" class="update-patient-doc" style="display:none">
+        <section id="update-patient-doc" class="update-patient-doc">
           <div class="container">
             <div class="row ">
               <div class="col-lg-4">
@@ -224,7 +225,11 @@
         {% endif %}
         <section></section>
         
+        {% if not username %}
         <section id="search" class="search">
+        {% else %}
+        <section id="search" class="search" style="display: none">
+        {% endif %}
           <div class="container">
             <h1 >Tìm kiếm kết quả sàng lọc sơ sinh</h1>
             <input type="search" id="search-with-id" class="form-control" placeholder="Ví dụ: 2200012345 hoặc AA123456"/>
