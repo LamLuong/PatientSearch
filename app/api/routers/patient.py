@@ -51,7 +51,7 @@ async def patient_doc(*, document_name: str, response: Response):
 @router.get("/get-patients", response_model=PatientsList)
 async def read_items(*, session: SessionDep, current_user: CurrentUser,
                      name:  Annotated[str | None, Query(max_length=100)] = None, seen : bool = None,
-                     limit: Annotated[int, Query(ge=1, le=100)] = 2, offset: Annotated[int , Query(ge=1)] = 1):
+                     limit: Annotated[int, Query(ge=1, le=100)] = 100, offset: Annotated[int , Query(ge=1)] = 1):
   if not current_user:
     raise credentials_exception
   
