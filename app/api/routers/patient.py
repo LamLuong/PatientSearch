@@ -76,7 +76,7 @@ async def read_items(*, session: SessionDep, current_user: CurrentUser,
     statement = statement.where(PatientInfo.is_downloaded == seen)
 
 
-  statement = statement.order_by(PatientInfo.created_at).offset((offset - 1)* limit).limit(limit)
+  statement = statement.order_by(PatientInfo.created_at.desc()).offset((offset - 1)* limit).limit(limit)
   items = session.exec(statement)
   patients_list = PatientsList(patients=items, total=total_record)
   return patients_list
