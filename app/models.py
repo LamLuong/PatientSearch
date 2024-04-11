@@ -20,16 +20,16 @@ class User(SQLModel, table=True):
 
 class PatientInfoBase(SQLModel):
   document_id: str | None = Field(default=None, primary_key=True)
-  name: str = Field(min_length=1, max_length=32)
-  mother_name: str = Field(min_length=1, max_length=32)
-  phone: str
+  name: str = Field(min_length=1, max_length=50)
+  mother_name: str = Field(min_length=1, max_length=50)
+  phone: str = Field(min_length=10, max_length=10)
 
-  # @validator("phone")
-  # def phone_validation(cls, v):
-  #   regex = r"^[1-9][0-9\-\(\)\.]{9,15}$"
-  #   if v and not re.search(regex, v, re.I):
-  #     raise ValueError("Phone Number Invalid.")
-  #   return v
+  @validator("phone")
+  def phone_validation(cls, v):
+    regex = r"^[0]{1}[1-9]{2}[0-9]{7}$"
+    if v and not re.search(regex, v, re.I):
+      raise ValueError("Phone Number Invalid.")
+    return v
 
 class PatientInfo(PatientInfoBase, table=True):
   __tablename__ = "patient_info"

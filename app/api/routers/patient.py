@@ -109,11 +109,14 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
     raise HTTPException(status_code=422, detail="Invalid input")
   
   item_db = PatientInfo.model_validate(item, update={"document_path": document_id + ".pdf", "created_at":datetime.now(timezone.utc)})
-  # print(item_db.created_at)
-  session.add(item_db)
-  session.commit()
-  session.refresh(item_db)
-
+  
+  try:
+    session.add(item_db)
+    session.commit()
+    session.refresh(item_db)
+  except:
+    raise HTTPException(status_code=422, detail="Canot not duplicate document id")
+  
   return {"status":"update patient 's document sucessfully."}
 
 @router.delete("/delete-patient/{document_id}")
