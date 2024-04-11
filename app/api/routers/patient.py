@@ -36,7 +36,7 @@ async def read_item(*, session: SessionDep, document_id: str):
 @router.get("/patient-doc", response_model=PatientInfo)
 async def patient_doc(*, document_name: str, response: Response):
   file_name = "./files/" + document_name
-  print(file_name)
+
   if not os.path.isfile(file_name):
     raise HTTPException(
             status_code=404,
@@ -96,7 +96,7 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
   if file.content_type != "application/pdf":
     raise HTTPException(400, detail="Invalid pdf document type")
   
-  out_file_path = "./files/" + file.filename
+  out_file_path = "./files/" + document_id + ".pdf"
   async with aiofiles.open(out_file_path, 'wb') as out_file:
         content = await file.read()  # async read
         await out_file.write(content)  # async write
@@ -108,7 +108,7 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
   except:
     raise HTTPException(status_code=422, detail="Invalid input")
   
-  item_db = PatientInfo.model_validate(item, update={"document_path": file.filename, "created_at":datetime.now(timezone.utc)})
+  item_db = PatientInfo.model_validate(item, update={"document_path": document_id + ".pdf", "created_at":datetime.now(timezone.utc)})
   # print(item_db.created_at)
   session.add(item_db)
   session.commit()
@@ -128,5 +128,7 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
     raise HTTPException(status_code=404, detail="Patient not found")
   session.delete(patient)
   session.commit()
+  os.remove("./files/" + document_id + ".pdf")
+
   return {"status":"delete patient 's document sucessfully."}
 
