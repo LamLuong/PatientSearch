@@ -8,7 +8,7 @@ $("#menu-patient-data-page").click(function() {
   $("#search").css("display", "none");
   $("#add-patient-doc").css("display", "block");
   $("#update-patient-doc").css("display", "block");
-})
+});
 
 $("#menu-search-page").click(function() {
   $('#menu-search-page').addClass('active');
@@ -17,16 +17,16 @@ $("#menu-search-page").click(function() {
   $("#add-patient-doc").css("display", "none");
   $("#update-patient-doc").css("display", "none");
   $("#search").css("display", "block");
-})
+});
 
 $("#logout").click(function() {
-  url = window.location.origin + '/api/v1/logout'
+  url = window.location.origin + '/api/v1/logout';
 
   $.post(url, { foo : null },
   function(data, status) {
-    window.location.replace(window.location.origin)
+    window.location.replace(window.location.origin);
   }).fail(function(){
-    alert("Invalid token")
+    alert("Invalid token");
   });
 });
 
@@ -47,16 +47,16 @@ $("#logout").click(function() {
 $("form#create-new-patient").submit(function(e) {
   e.preventDefault();    
   var formData = new FormData(this);
-  url = window.location.origin + '/create-patient'
+  url = window.location.origin + '/create-patient';
   $.ajax({
       url: url,
       type: 'POST',
       data: formData,
       success: function (data) {
-          alert("Thêm thông tin bệnh nhân thành công")
+          alert("Thêm thông tin bệnh nhân thành công");
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) { 
-        alert("Error: Không được trùng mã bệnh án"); 
+        alert("Error: Không được trùng mã bệnh án");
       },
       cache: false,
       contentType: false,
@@ -66,7 +66,7 @@ $("form#create-new-patient").submit(function(e) {
 
 function getPatientsByFilter(offset=1) {
   var getJustNotViewed = $("#admin-get-viewed").is(":checked");
-  var inputName = document.getElementById("admin-filter-name").value
+  var inputName = document.getElementById("admin-filter-name").value;
   
   var filterNotViewed = null, filterName = null;
   if (getJustNotViewed) filterNotViewed = false;
@@ -76,52 +76,52 @@ function getPatientsByFilter(offset=1) {
 }
 
 function UpdateViewByFilter() {
-  current_paging = 1
-  getPatientsByFilter()
+  current_paging = 1;
+  getPatientsByFilter();
 }
 
 function goToPaging(obj, direct=true) {
   
   if (obj !== null) {
-    current_paging = $(obj).text()
+    current_paging = $(obj).text();
   } else {
     if (!direct)
-      current_paging = parseInt(current_paging) - 1
+      current_paging = parseInt(current_paging) - 1;
 
     if (direct)
-      current_paging = parseInt(current_paging) + 1
+      current_paging = parseInt(current_paging) + 1;
   }
   
   if (current_paging < 1) {
     current_paging = 1;
-    return
+    return;
   }
   
   if (current_paging > total_page) {
     current_paging = total_page;
-    return
+    return;
   }
   
-  getPatientsByFilter(current_paging)
+  getPatientsByFilter(current_paging);
 }
 
 function dropDownGotoPage() {
   input_page = document.getElementById('goto-page-dropdown-menu').children[0].children[0];
   if (input_page.reportValidity()) {
-    current_paging = input_page.value
-    getPatientsByFilter(current_paging) 
+    current_paging = input_page.value;
+    getPatientsByFilter(current_paging);
   }
 }
 
 function deletePatient(obj) {
-  doc_id = $(obj).parent().parent().children(':first-child').text()
+  doc_id = $(obj).parent().parent().children(':first-child').text();
   url = window.location.origin + '/delete-patient/' + doc_id;
   $.ajax({
     url: url,
     type: 'DELETE',
     data: {},
     success: function (data) {
-      getPatientsByFilter(current_paging)
+      getPatientsByFilter(current_paging);
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) { 
       alert("Error: " + errorThrown); 
@@ -133,26 +133,26 @@ function deletePatient(obj) {
 }
 
 function showGotoPageDropdown() {
-  var x = document.getElementById("goto-page-dropdown-menu")
+  let x = document.getElementById("goto-page-dropdown-menu");
 
   if($('#goto-page-dropdown-menu').css('display') == 'none') {
-    x.style.display = "block"
+    x.style.display = "block";
   } else {
-    x.style.display = "none"
+    x.style.display = "none";
   }
 }
 
 function getPatients(name = null, seen = null, offset = 1) {
-  url = window.location.origin + '/get-patients?'
+  url = window.location.origin + '/get-patients?';
   if (name !== null) {  
-    url = url + 'name=' + name
+    url = url + 'name=' + name;
   }
   if (seen !== null) {  
-    url = url + '&seen=' + seen
+    url = url + '&seen=' + seen;
   }
 
-  url = url + '&offset=' + offset
-  console.log(url)
+  url = url + '&offset=' + offset;
+  
   $.ajax({
       url: url,
       type: 'GET',
@@ -162,13 +162,13 @@ function getPatients(name = null, seen = null, offset = 1) {
         $('#data-paging-idx').empty();
 
         $.each(data.patients, function (key, value) {
-          var status = "Chưa xem"
+          var status = "Chưa xem";
           if (value.is_downloaded) {
-            status = "Đã xem"
+            status = "Đã xem";
           }
 
-          var utc_time = value.created_at + "+00:00";
-          var theDate = (new Date(utc_time)).toLocaleString('en-GB')
+          let utc_time = value.created_at + "+00:00";
+          let theDate = (new Date(utc_time)).toLocaleString('en-GB');
           // var theDate = new Date(Date.parse(value.created_at));
 
           $('#list-patients').append('<tr>\
@@ -180,18 +180,18 @@ function getPatients(name = null, seen = null, offset = 1) {
                 <td>'+status+'</td>\
                 <td> <a class="delete-patient" onClick="deletePatient(this)">Xóa</a></td>\
                 </tr>');
-        })
+        });
 
 
         $('#data-paging-idx').append('<li class="page-item">\
                                         <a class="page-link" onClick="goToPaging(null, false)" style="cursor: default" aria-label="Previous">\
                                           <span aria-hidden="true">&laquo;</span>\
                                         </a>\
-                                      </li>')
+                                      </li>');
         // $('#data-paging-idx').append('<li class="page-item"><a class="page-link active" onClick=goToPaging(this) style="cursor: pointer">'+i+'</a></li>');
-        total_page = Math.ceil(data.total / default_record_perpage)
+        total_page = Math.ceil(data.total / default_record_perpage);
         if (current_paging > total_page) {
-          current_paging = total_page
+          current_paging = total_page;
         }
 
         for (i = 1; i <= total_page; i++) {
@@ -201,8 +201,9 @@ function getPatients(name = null, seen = null, offset = 1) {
             else
               $('#data-paging-idx').append('<li class="page-item"><a class="page-link" onClick=goToPaging(this) style="cursor: pointer">'+i+'</a></li>');
           else if (i == 4) {
-            if (current_paging >= 4 && current_paging < total_page)
+            if (current_paging >= 4 && current_paging < total_page) {
               $('#data-paging-idx').append('<li class="page-item"><a class="page-link active" style="cursor: default">' + current_paging + '</a></li>');
+            }
             $('#data-paging-idx').append('<li class="page-item">\
                                             <a class="page-link" style="cursor: default; margin-bottom: 12px" onClick=showGotoPageDropdown()>...</a>\
                                             <div class="goto-page-dropdown-content arrow-top" id="goto-page-dropdown-menu">\
@@ -219,7 +220,7 @@ function getPatients(name = null, seen = null, offset = 1) {
                                         <a class="page-link" onClick="goToPaging(null, true)" style="cursor: default" aria-label="Next">\
                                           <span aria-hidden="true">&raquo;</span>\
                                         </a>\
-                                      </li>')
+                                      </li>');
         
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) { 
@@ -233,7 +234,7 @@ function getPatients(name = null, seen = null, offset = 1) {
 
 // A $( document ).ready() block.
 $(document).ready(function() {
-  url = window.location.origin + '/get-patients'
+  url = window.location.origin + '/get-patients';
   getPatients();
 });
 
