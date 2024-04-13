@@ -195,12 +195,13 @@ function getPatients(name = null, seen = null, offset = 1) {
         }
 
         for (i = 1; i <= total_page; i++) {
-          if (i < 4 || i == total_page)
-            if (i == current_paging)
+          if (i < 4 || i == total_page) {
+            if (i == current_paging) {
               $('#data-paging-idx').append('<li class="page-item"><a class="page-link active" onClick=goToPaging(this) style="cursor: pointer">'+i+'</a></li>');
-            else
+            } else {
               $('#data-paging-idx').append('<li class="page-item"><a class="page-link" onClick=goToPaging(this) style="cursor: pointer">'+i+'</a></li>');
-          else if (i == 4) {
+            }
+          } else if (i == 4) {
             if (current_paging >= 4 && current_paging < total_page) {
               $('#data-paging-idx').append('<li class="page-item"><a class="page-link active" style="cursor: default">' + current_paging + '</a></li>');
             }
