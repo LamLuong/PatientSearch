@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=123qwe
+    volumes: 
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - db_nw
+  backend:
+    image: 'backend:${TAG-latest}'
+    restart: always
+    networks:
+      - db_nw
+      - default
+    depends_on:
+      - db
+    ports:
+      - '9981:9981'
+    volumes:
+    - ./files:/code/app/files
+    environment:
+      - POSTGRES_SERVER=db
+    build:
+      context: .
+      
+volumes:
+  db_data:
+    driver: local
+networks:
+  db_nw:
+    driver: bridge
