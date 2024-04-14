@@ -25,12 +25,17 @@ async def read_item(*, session: SessionDep, document_id: str):
     ) 
   
   item = session.get(PatientInfo, document_id)
+
   if not item:
     raise HTTPException(
             status_code=404,
             detail="Item not found",
             headers={"X-Error": "There goes my error"},
     )
+  item.is_downloaded = True
+  session.add(item)
+  session.commit()
+  session.refresh(item)
   return item
 
 @router.get("/patient-doc", response_model=PatientInfo)
