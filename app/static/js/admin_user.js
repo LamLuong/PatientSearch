@@ -46,14 +46,40 @@ $("#logout").click(function() {
 
 $("form#create-new-patient").submit(function(e) {
   e.preventDefault();    
-  var formData = new FormData(this);
+  let formData = new FormData(this);
   url = window.location.origin + '/create-patient';
   $.ajax({
       url: url,
       type: 'POST',
       data: formData,
       success: function (data) {
-          alert("Thêm thông tin bệnh nhân thành công");
+        alert("Thêm thông tin bệnh nhân thành công");
+
+        let specialist;
+        switch(parseInt(formData.get("specialist"))) {
+          case 1:
+            specialist = "Sản";
+            break;
+          case 2:
+            specialist = "Điều trị theo yêu cầu";
+            break;
+          case 3:
+            specialist = "Sơ Sinh";
+            break;
+          default:
+            specialist = "NAL";
+        }
+
+        $('#list-patients').prepend('<tr>\
+        <td>'+formData.get("document_id")+'</td>\
+        <td>'+formData.get("name")+'</td>\
+        <td>'+formData.get("mother_name")+'</td>\
+        <td>'+formData.get("phone")+'</td>\
+        <td>'+specialist+'</td>\
+        <td>'+new Date($.now()).toLocaleString('en-GB')+'</td>\
+        <td>Chưa xem</td>\
+        <td> <a class="delete-patient" onClick="deletePatient(this)">Xóa</a></td>\
+        </tr>');
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) { 
         alert("Error: " + errorThrown);
@@ -167,7 +193,7 @@ function getPatients(name = null, seen = null, specialist = 0,offset = 1) {
         $('#data-paging-idx').empty();
 
         $.each(data.patients, function (key, value) {
-          var status = "Chưa xem";
+          let status = "Chưa xem";
           if (value.is_downloaded) {
             status = "Đã xem";
           }
