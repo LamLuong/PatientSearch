@@ -169,10 +169,10 @@ function showGotoPageDropdown() {
   }
 }
 
-function getPatients(name = null, seen = null, specialist = 0,offset = 1) {
+function getPatients(mother_name = null, seen = null, specialist = 0,offset = 1) {
   url = window.location.origin + '/get-patients?';
-  if (name !== null) {  
-    url = url + 'name=' + name;
+  if (mother_name !== null) {  
+    url = url + 'mother_name=' + mother_name;
   }
   if (seen !== null) {  
     url = url + '&seen=' + seen;

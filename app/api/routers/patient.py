@@ -55,7 +55,7 @@ async def patient_doc(*, document_name: str, response: Response):
 
 @router.get("/get-patients", response_model=PatientsList)
 async def read_items(*, session: SessionDep, current_user: CurrentUser,
-                     name:  Annotated[str | None, Query(max_length=100)] = None, seen : bool = None,
+                     mother_name:  Annotated[str | None, Query(max_length=100)] = None, seen : bool = None,
                      specialist: Annotated[int, Query(ge=0, le=3)] = 0,
                      limit: Annotated[int, Query(ge=1, le=100)] = 100, offset: Annotated[int , Query(ge=1)] = 1):
   if not current_user:
@@ -63,8 +63,8 @@ async def read_items(*, session: SessionDep, current_user: CurrentUser,
   
   count_statement = select(func.count(PatientInfo.document_id))
 
-  if name:
-    count_statement = count_statement.where(PatientInfo.name.contains(name))
+  if mother_name:
+    count_statement = count_statement.where(PatientInfo.mother_name.contains(mother_name))
   if seen is not None:
     count_statement = count_statement.where(PatientInfo.is_downloaded == seen)
 
@@ -75,8 +75,8 @@ async def read_items(*, session: SessionDep, current_user: CurrentUser,
   
   statement = select(PatientInfo)
 
-  if name:
-    statement = statement.where(PatientInfo.name.contains(name))
+  if mother_name:
+    statement = statement.where(PatientInfo.mother_name.contains(mother_name))
 
   if seen is not None:
     statement = statement.where(PatientInfo.is_downloaded == seen)
