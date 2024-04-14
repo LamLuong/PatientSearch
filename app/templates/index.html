@@ -172,7 +172,7 @@
         <section id="update-patient-doc" class="update-patient-doc">
           <div class="container">
             <div class="row ">
-              <div class="col-lg-4">
+              <div class="col-lg-3">
                 <nav aria-label="Page navigation example">
                   <ul class="pagination" id="data-paging-idx">
                     <!-- <li class="page-item">
@@ -192,18 +192,26 @@
                   </ul>
                 </nav>
               </div>
-              <div class="col-lg-4">
 
+              <div class="col-lg-3">
                 <form>
-
-                <div class="input-group">
-                  <input type="text" class="form-control" placeholder="Họ tên" id="admin-filter-name">
-                  <button type="button" class="btn btn-success" onClick="UpdateViewByFilter()"> Tìm Kiếm </button>
-                </div>
-              </form> 
-
+                  <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Họ tên mẹ" id="admin-filter-name">
+                    <button type="button" class="btn btn-success" onClick="UpdateViewByFilter()"> Tìm Kiếm </button>
+                  </div>
+                </form> 
               </div>
-              <div class="col-lg-4">
+
+              <div class="col-lg-3">
+                <select class="form-select" id="specialist-filter" onchange="UpdateViewByFilter()">
+                    <option selected value=0>Tất cả khoa</option>
+                    <option value=1>Khoa sản</option>
+                    <option value=2>Khoa điều trị theo yêu cầu</option>
+                    <option value=3>Khoa sơ sinh</option>
+                </select>
+              </div>
+
+              <div class="col-lg-3">
                 <div class="form-check" style="float: right;">
                   <input class="form-check-input" type="checkbox" value="" id="admin-get-viewed" onClick="UpdateViewByFilter()">
                   <label class="form-check-label" for="flexCheckChecked"> Chỉ hiển thị tài liệu chưa xem </label>

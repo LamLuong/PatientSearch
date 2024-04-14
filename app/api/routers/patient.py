@@ -51,6 +51,7 @@ async def patient_doc(*, document_name: str, response: Response):
 @router.get("/get-patients", response_model=PatientsList)
 async def read_items(*, session: SessionDep, current_user: CurrentUser,
                      name:  Annotated[str | None, Query(max_length=100)] = None, seen : bool = None,
+                     specialist: Annotated[int, Query(ge=0, le=3)] = 0,
                      limit: Annotated[int, Query(ge=1, le=100)] = 100, offset: Annotated[int , Query(ge=1)] = 1):
   if not current_user:
     raise credentials_exception
@@ -74,6 +75,9 @@ async def read_items(*, session: SessionDep, current_user: CurrentUser,
 
   if seen is not None:
     statement = statement.where(PatientInfo.is_downloaded == seen)
+
+  if specialist > 0:
+    statement = statement.where(PatientInfo.specialist == specialist)
 
 
   statement = statement.order_by(PatientInfo.created_at.desc()).offset((offset - 1)* limit).limit(limit)

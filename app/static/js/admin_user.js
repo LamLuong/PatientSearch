@@ -65,14 +65,15 @@ $("form#create-new-patient").submit(function(e) {
 });
 
 function getPatientsByFilter(offset=1) {
-  var getJustNotViewed = $("#admin-get-viewed").is(":checked");
-  var inputName = document.getElementById("admin-filter-name").value;
-  
-  var filterNotViewed = null, filterName = null;
+  let getJustNotViewed = $("#admin-get-viewed").is(":checked");
+  let inputName = document.getElementById("admin-filter-name").value;
+  let specialist_selected = $('#specialist-filter').val();
+
+  let filterNotViewed = null, filterName = null;
   if (getJustNotViewed) filterNotViewed = false;
   if (inputName) filterName = inputName;
 
-  getPatients(filterName, filterNotViewed, offset);
+  getPatients(filterName, filterNotViewed, specialist_selected, offset);
 }
 
 function UpdateViewByFilter() {
@@ -142,13 +143,17 @@ function showGotoPageDropdown() {
   }
 }
 
-function getPatients(name = null, seen = null, offset = 1) {
+function getPatients(name = null, seen = null, specialist = 0,offset = 1) {
   url = window.location.origin + '/get-patients?';
   if (name !== null) {  
     url = url + 'name=' + name;
   }
   if (seen !== null) {  
     url = url + '&seen=' + seen;
+  }
+
+  if (specialist > 0) {  
+    url = url + '&specialist=' + specialist;
   }
 
   url = url + '&offset=' + offset;
