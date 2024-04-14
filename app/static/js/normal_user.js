@@ -16,8 +16,8 @@ $("#authUser").click(function() {
 
 
 $("#search-patient").click(function() {
-  var url = window.location.origin + '/get-patient';
-  var doc_id = $('#search-with-id').val();
+  let url = window.location.origin + '/get-patient';
+  let doc_id = $('#search-with-id').val();
 
   if (!doc_id) {
     alert("Trường tìm kiếm không được để trống");
@@ -31,7 +31,7 @@ $("#search-patient").click(function() {
     $('#mother-name').text(data.mother_name);
     $('#mother-phone').text(data.phone);
 
-    doc_url = window.location.origin + '/patient-doc/?document_name=' + data.document_path;
+    doc_url = window.location.origin + '/patient-doc/?document_name=' + doc_id + ".pdf";
     $('#document-name-url').attr("href", doc_url);
 
     $("#search-result").css("visibility", "visible");
