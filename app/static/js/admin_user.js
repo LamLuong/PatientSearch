@@ -56,7 +56,7 @@ $("form#create-new-patient").submit(function(e) {
           alert("Thêm thông tin bệnh nhân thành công");
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) { 
-        alert("Error: Không được trùng mã bệnh án");
+        alert("Error: " + errorThrown);
       },
       cache: false,
       contentType: false,
@@ -170,12 +170,27 @@ function getPatients(name = null, seen = null, offset = 1) {
           let utc_time = value.created_at + "+00:00";
           let theDate = (new Date(utc_time)).toLocaleString('en-GB');
           // var theDate = new Date(Date.parse(value.created_at));
+          let specialist;
+          switch(value.specialist) {
+            case 1:
+              specialist = "Sản";
+              break;
+            case 2:
+              specialist = "Điều trị theo yêu cầu";
+              break;
+            case 3:
+              specialist = "Sơ Sinh";
+              break;
+            default:
+              specialist = "NAL";
+          }
 
           $('#list-patients').append('<tr>\
                 <td>'+value.document_id+'</td>\
                 <td>'+value.name+'</td>\
                 <td>'+value.mother_name+'</td>\
                 <td>'+value.phone+'</td>\
+                <td>'+specialist+'</td>\
                 <td>'+theDate+'</td>\
                 <td>'+status+'</td>\
                 <td> <a class="delete-patient" onClick="deletePatient(this)">Xóa</a></td>\

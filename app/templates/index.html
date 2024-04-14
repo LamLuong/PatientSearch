@@ -149,9 +149,16 @@
                 </div>
               </div>
 
-              <div class="mb-3">
+              <div class="row mb-4">
                 <div class="col">
-                  <input class="form-control" type="file" id="doc-pdf" name="file" style="width: 50%">
+                  <input class="form-control" type="file" id="doc-pdf" name="file">
+                </div>
+                <div class="col">
+                  <select class="form-select" name="specialist" aria-label="Default select example">
+                    <option selected value=1>Khoa sản</option>
+                    <option value=2>Khoa điều trị theo yêu cầu</option>
+                    <option value=3>Khoa sơ sinh</option>
+                  </select>
                 </div>
               </div>
 
@@ -207,10 +214,11 @@
             <table class="table">
               <thead>
                 <tr>
-                  <th scope="col">Mã bệnh án</th>
-                  <th scope="col">Họ Tên</th>
+                  <th scope="col">Mã Y Tế</th>
+                  <th scope="col">Họ Tên Con</th>
                   <th scope="col">Họ Tên Mẹ</th>
                   <th scope="col">Số Điện Thoại</th>
+                  <th scope="col">Khoa</th>
                   <th scope="col">Ngày Tạo</th>
                   <th scope="col">Trạng Thái</th>
                   <th scope="col">Hành động</th>
