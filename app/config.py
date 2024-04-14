@@ -43,7 +43,7 @@ class Settings(BaseSettings):
       return None
     return v
 
-  POSTGRES_SERVER: str = "db"
+  POSTGRES_SERVER: str = "localhost"
   POSTGRES_USER: str = "admin"
   POSTGRES_PASSWORD: str = "123qwe"
   POSTGRES_DB: str = "patient_mr"

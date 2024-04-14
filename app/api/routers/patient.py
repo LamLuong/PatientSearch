@@ -85,9 +85,10 @@ async def read_items(*, session: SessionDep, current_user: CurrentUser,
 @router.post("/create-patient")
 async def create_patient( *, session: SessionDep, current_user: CurrentUser,
                          document_id: str = Form(...),
-                         name: str = Form(...),
-                         mother_name: str = Form(...),
-                         phone: str = Form(...),
+                         name: str = Form(min_length=1, max_length=50),
+                         mother_name: str = Form(min_length=1, max_length=50),
+                         phone: str = Form(min_length=10, max_length=13),
+                         specialist: int = Form(gt=0, lt=4),
                          file: UploadFile) -> Any:
   
   if not current_user:
@@ -104,11 +105,12 @@ async def create_patient( *, session: SessionDep, current_user: CurrentUser,
     item = PatientInfoBase(document_id=document_id,
                      name=name,
                      mother_name=mother_name,
-                     phone=phone)
+                     phone=phone,
+                     specialist=specialist)
   except:
     raise HTTPException(status_code=422, detail="Invalid input")
   
-  item_db = PatientInfo.model_validate(item, update={"document_path": document_id + ".pdf", "created_at":datetime.now(timezone.utc)})
+  item_db = PatientInfo.model_validate(item, update={"created_at":datetime.now(timezone.utc)})
   
   try:
     session.add(item_db)
